@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { createWorker } from 'tesseract.js';
-const worker = await createWorker("eng")
+
 import { useState } from 'react';
 
 
@@ -22,22 +22,24 @@ import { useState } from 'react';
 
 
 const App = ({ setCode, setScanning }) => {
-     const [buttonClicked, setButtonClicked] = useState(false); // Track button click
-    
-// Updated video config
-const scaleFactor = 1.5; // Adjust this factor to enlarge proportionally
+    const [buttonClicked, setButtonClicked] = useState(false); // Track button click
+    const [extractedText, setExtractedText] = useState(""); // Store OCR text
+    const [scannedText, setScannedText] = useState("")
 
-const vidWidth = (window.innerWidth - 60) * scaleFactor;
-const vidHeight = 260 * scaleFactor;
-const vidOffsetTop = 240 * scaleFactor;
-const vidOffsetLeft = ((window.innerWidth) / 2) - (vidWidth / 2);
+    // Updated video config
+    const scaleFactor = 1.5; // Adjust this factor to enlarge proportionally
 
-// Updated indicator config
-const marginX = 40 * scaleFactor;
-const indWidth = vidWidth - marginX;
-const indHeight = 580;
-const indOffsetTop = vidOffsetTop + (vidHeight / 2) - (indHeight / 2);
-const indOffsetLeft = (window.innerWidth / 2) - (indWidth / 2);
+    const vidWidth = (window.innerWidth - 60) * scaleFactor;
+    const vidHeight = 260 * scaleFactor;
+    const vidOffsetTop = 240 * scaleFactor;
+    const vidOffsetLeft = ((window.innerWidth) / 2) - (vidWidth / 2);
+
+    // Updated indicator config
+    const marginX = 40 * scaleFactor;
+    const indWidth = vidWidth - marginX;
+    const indHeight = 580;
+    const indOffsetTop = vidOffsetTop + (vidHeight / 2) - (indHeight / 2);
+    const indOffsetLeft = (window.innerWidth / 2) - (indWidth / 2);
     const myVideo = useRef();
     const myStream = useRef();
     const scannedCodes = useRef();
@@ -48,25 +50,25 @@ const indOffsetLeft = (window.innerWidth / 2) - (indWidth / 2);
                 video: { facingMode: "environment" },
                 audio: false
             })
-            .then(stream => {
-                myVideo.current.srcObject = stream;
-                myVideo.current.onloadedmetadata = () => {
-                myVideo.current.play().catch(err => console.error("Video play error:", err));
-              };
-                myStream.current = stream;
-                scannedCodes.current = {};
+                .then(stream => {
+                    myVideo.current.srcObject = stream;
+                    myVideo.current.onloadedmetadata = () => {
+                        myVideo.current.play().catch(err => console.error("Video play error:", err));
+                    };
+                    myStream.current = stream;
+                    scannedCodes.current = {};
 
-                (async () => {
-                    // await worker.load();
-                    // await worker.loadLanguage("eng");
-                    // await worker.initialize("eng");
-                    requestAnimationFrame(tick);
-                })()
-            })
-            .catch(err => {
-                console.error(err);
-                // handle error here with popup
-            })
+                    (async () => {
+                        // await worker.load();
+                        // await worker.loadLanguage("eng");
+                        // await worker.initialize("eng");
+                        requestAnimationFrame(tick);
+                    })()
+                })
+                .catch(err => {
+                    console.error(err);
+                    // handle error here with popup
+                })
         }
 
         return () => myStream && myStream.current && myStream.current.getTracks().forEach(x => x.stop());
@@ -74,15 +76,16 @@ const indOffsetLeft = (window.innerWidth / 2) - (indWidth / 2);
     }, []);
 
     const tick = async () => {
-      console.log("I came here");
-      console.log(myVideo && myVideo.current && myVideo.current.readyState === myVideo.current.HAVE_ENOUGH_DATA);
-      
-      if(true){
-        // if (myVideo && myVideo.current && myVideo.current.readyState === myVideo.current.HAVE_ENOUGH_DATA) {
+        const worker = await createWorker("eng")
+        console.log("I came here");
+        console.log(myVideo && myVideo.current && myVideo.current.readyState === myVideo.current.HAVE_ENOUGH_DATA);
+
+        if (true) {
+            // if (myVideo && myVideo.current && myVideo.current.readyState === myVideo.current.HAVE_ENOUGH_DATA) {
             // canvas
             const canvas = document.createElement("canvas");
-            canvas.width = indWidth+500;
-            canvas.height = indHeight +500;
+            canvas.width = indWidth + 500;
+            canvas.height = indHeight + 500;
 
             const image = myVideo.current;
             // source 
@@ -96,27 +99,29 @@ const indOffsetLeft = (window.innerWidth / 2) - (indWidth / 2);
             const dWidth = indWidth;
             const dHeight = indHeight;
 
-          //   canvas.getContext("2d").drawImage(
-          //     image, 
-          //     (marginX / 2) / 2, 
-          //     vidHeight - indHeight, 
-          //     (indWidth * scaleFactor)+500, 
-          //     indHeight * scaleFactor, 
-          //     0, 
-          //     0, 
-          //     indWidth, 
-          //     indHeight
-          // );
-          canvas.getContext("2d")
-          .drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+            //   canvas.getContext("2d").drawImage(
+            //     image, 
+            //     (marginX / 2) / 2, 
+            //     vidHeight - indHeight, 
+            //     (indWidth * scaleFactor)+500, 
+            //     indHeight * scaleFactor, 
+            //     0, 
+            //     0, 
+            //     indWidth, 
+            //     indHeight
+            // );
+            canvas.getContext("2d")
+                .drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
 
             // tesseract
             const { data: { text } } = await worker.recognize(canvas);
             const regex = /[a-zA-Z0-9]/gi;
             const scannedText = text && text.match(regex) && text.match(regex).filter(x => x).join("");
-            console.log({text, scannedText});
+            console.log({ text, scannedText });
             console.log("Captured frame:", canvas.toDataURL());
-
+            // Update state to display on UI
+            setExtractedText(text);
+            setScannedText(filteredText);
             requestAnimationFrame(tick);
         }
         // }
@@ -126,8 +131,8 @@ const indOffsetLeft = (window.innerWidth / 2) - (indWidth / 2);
 
         <div>
             <h1>HIIII</h1>
-           {/* <button onClick={() => tick()}>Start Scanning</button> */}
-           <button onClick={() => myVideo.current?.play()}>Start Video</button>
+            {/* <button onClick={() => tick()}>Start Scanning</button> */}
+            <button onClick={() => myVideo.current?.play()}>Start Video</button>
 
             <video
                 ref={myVideo}
@@ -138,11 +143,13 @@ const indOffsetLeft = (window.innerWidth / 2) - (indWidth / 2);
                 height={vidHeight}
                 style={{
                     position: "absolute",
-                    top: vidOffsetTop ,
+                    top: vidOffsetTop,
                     left: vidOffsetLeft,
                     zIndex: 2
                 }}
             ></video>
+
+
             <div
                 style={{
                     width: indWidth,
@@ -154,6 +161,18 @@ const indOffsetLeft = (window.innerWidth / 2) - (indWidth / 2);
                     left: indOffsetLeft
                 }}
             ></div>
+
+
+            <div>
+                <h3>Extracted Text:</h3>
+                <p>{extractedText}</p>
+            </div>
+
+            {/* Display Scanned Text */}
+            <div>
+                <h3>Scanned Text:</h3>
+                <p>{scannedText}</p>
+            </div>
         </div>
     )
 };
