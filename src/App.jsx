@@ -131,6 +131,16 @@ const App = ({ setCode, setScanning }) => {
 
         <div>
             <h1>HIIII</h1>
+            <div>
+                <h3>Extracted Text:</h3>
+                <p>{extractedText}</p>
+            </div>
+
+            {/* Display Scanned Text */}
+            <div>
+                <h3>Scanned Text:</h3>
+                <p>{scannedText}</p>
+            </div>
             {/* <button onClick={() => tick()}>Start Scanning</button> */}
             <button onClick={() => myVideo.current?.play()}>Start Video</button>
 
@@ -163,16 +173,7 @@ const App = ({ setCode, setScanning }) => {
             ></div>
 
 
-            <div>
-                <h3>Extracted Text:</h3>
-                <p>{extractedText}</p>
-            </div>
-
-            {/* Display Scanned Text */}
-            <div>
-                <h3>Scanned Text:</h3>
-                <p>{scannedText}</p>
-            </div>
+        
         </div>
     )
 };
