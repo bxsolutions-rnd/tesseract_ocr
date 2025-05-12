@@ -143,37 +143,37 @@ const App = ({ setCode, setScanning }) => {
             </div>
             {/* <button onClick={() => tick()}>Start Scanning</button> */}
             <button onClick={() => myVideo.current?.play()}>Start Video</button>
-
-            <video
-                ref={myVideo}
-                muted
-                autoPlay
-                playsInline
-                width={vidWidth}
-                height={vidHeight}
-                style={{
-                    position: "absolute",
-                    top: vidOffsetTop,
-                    left: vidOffsetLeft,
-                    zIndex: 2
-                }}
-            ></video>
-
-
-            <div
-                style={{
-                    width: indWidth,
-                    height: indHeight,
-                    border: "1px red solid",
-                    zIndex: 3,
-                    position: "absolute",
-                    top: indOffsetTop,
-                    left: indOffsetLeft
-                }}
-            ></div>
+            <div>
+                <video
+                    ref={myVideo}
+                    muted
+                    autoPlay
+                    playsInline
+                    width={vidWidth}
+                    height={vidHeight}
+                    style={{
+                        position: "absolute",
+                        top: vidOffsetTop,
+                        left: vidOffsetLeft,
+                        zIndex: 2
+                    }}
+                ></video>
 
 
-        
+                <div
+                    style={{
+                        width: indWidth,
+                        height: indHeight,
+                        border: "1px red solid",
+                        zIndex: 3,
+                        position: "absolute",
+                        top: indOffsetTop,
+                        left: indOffsetLeft
+                    }}
+                ></div>
+            </div>
+
+
         </div>
     )
 };
